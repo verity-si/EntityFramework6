@@ -92,6 +92,7 @@ namespace System.Data.Entity.SqlServer
                                && asSpatialKey.ProviderInvariantName == ProviderInvariantName
                                && SupportsSpatial(asSpatialKey.ProviderManifestToken);
                     }));
+
             UseScopeIdentity = true;
         }
 
