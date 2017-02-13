@@ -1157,7 +1157,7 @@ namespace System.Data.Entity.SqlServer
         /// Determines whether the database for the given connection exists.
         /// There are three cases:
         /// 1.  Initial Catalog = X, AttachDBFilename = null:   (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0
-        /// 2.  Initial Catalog = X, AttachDBFilename = F:      if (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0 <c>true</c>,
+        /// 2.  Initial Catalog = X, AttachDBFilename = F:      if (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0 then <c>true</c>,
         /// if not, try to open the connection and then return (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0
         /// 3.  Initial Catalog = null, AttachDBFilename = F:   Try to open the connection. If that succeeds the result is true, otherwise
         /// if the there are no databases corresponding to the given file return <c>false</c>, otherwise throw.
@@ -1180,7 +1180,7 @@ namespace System.Data.Entity.SqlServer
         /// Determines whether the database for the given connection exists.
         /// There are three cases:
         /// 1.  Initial Catalog = X, AttachDBFilename = null:   (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0
-        /// 2.  Initial Catalog = X, AttachDBFilename = F:      if (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0 <c>true</c>,
+        /// 2.  Initial Catalog = X, AttachDBFilename = F:      if (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0 then <c>true</c>,
         /// if not, try to open the connection and then return (SELECT Count(*) FROM sys.databases WHERE [name]= X) > 0
         /// 3.  Initial Catalog = null, AttachDBFilename = F:   Try to open the connection. If that succeeds the result is true, otherwise
         /// if the there are no databases corresponding to the given file return <c>false</c>, otherwise throw.
