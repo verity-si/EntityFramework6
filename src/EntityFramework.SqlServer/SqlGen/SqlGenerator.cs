@@ -188,6 +188,9 @@ namespace System.Data.Entity.SqlServer.SqlGen
         // </summary>
         private Stack<SqlSelectStatement> selectStatementStack;
 
+        // This flag is used to indicate whether we should use row_number() function for ordering queries with OFFSET operation.
+        private bool _useOrderByRowNumberForQueriesWithOffset;
+
         // <summary>
         // The top of the stack
         // </summary>
@@ -355,7 +358,7 @@ namespace System.Data.Entity.SqlServer.SqlGen
         // <param name="commandType"> CommandType for generated command. </param>
         // <returns> The string representing the SQL to be executed. </returns>
         internal static string GenerateSql(
-            DbCommandTree tree, SqlVersion sqlVersion, out List<SqlParameter> parameters, out CommandType commandType,
+            DbCommandTree tree, SqlVersion sqlVersion, bool useOrderByRowNumberForQueriesWithOffset, out List<SqlParameter> parameters, out CommandType commandType,
             out HashSet<string> paramsToForceNonUnicode)
         {
             commandType = CommandType.Text;
@@ -367,7 +370,7 @@ namespace System.Data.Entity.SqlServer.SqlGen
             switch (tree.CommandTreeKind)
             {
                 case DbCommandTreeKind.Query:
-                    return sqlGenerator.GenerateSql((DbQueryCommandTree)tree, out paramsToForceNonUnicode);
+                    return sqlGenerator.GenerateSql((DbQueryCommandTree)tree, useOrderByRowNumberForQueriesWithOffset, out paramsToForceNonUnicode);
 
                 case DbCommandTreeKind.Insert:
                     return DmlSqlGenerator.GenerateInsertSql((DbInsertCommandTree)tree, sqlGenerator, out parameters);
@@ -438,11 +441,12 @@ namespace System.Data.Entity.SqlServer.SqlGen
         // non collection type => select expression
         // </summary>
         // <returns> The string representing the SQL to be executed. </returns>
-        internal string GenerateSql(DbQueryCommandTree tree, out HashSet<string> paramsToForceNonUnicode)
+        internal string GenerateSql(DbQueryCommandTree tree, bool useOrderByRowNumberForQueriesWithOffset, out HashSet<string> paramsToForceNonUnicode)
         {
             DebugCheck.NotNull(tree.Query);
 
             _targets = new List<string>();
+            _useOrderByRowNumberForQueriesWithOffset = useOrderByRowNumberForQueriesWithOffset;
 
             var targetTree = tree;
 
@@ -2552,7 +2556,16 @@ namespace System.Data.Entity.SqlServer.SqlGen
                 input.Select.Skip = new SkipClause(HandleCountExpression(e.Count));
 
                 // Add the ORDER BY part.
-                AddSortKeys(input.OrderBy, e.SortOrder);
+                if (_useOrderByRowNumberForQueriesWithOffset)
+                {
+                    input.OrderBy.Append("row_number() OVER (ORDER BY ");
+                    AddSortKeys(input.OrderBy, e.SortOrder);
+                    input.OrderBy.Append(")");
+                }
+                else
+                {
+                    AddSortKeys(input.OrderBy, e.SortOrder);
+                }
 
                 symbolTable.ExitScope();
                 selectStatementStack.Pop();

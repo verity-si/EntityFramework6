@@ -170,7 +170,7 @@ namespace System.Data.Entity.SqlServer
                 {
                     HashSet<string> _;
                     var historyQuery
-                        = _sqlGenerator.GenerateSql(historyQueryTree, out _);
+                        = _sqlGenerator.GenerateSql(historyQueryTree, false, out _);
 
                     writer.Write("IF object_id('");
                     writer.Write(Escape(_sqlGenerator.Targets.Single()));

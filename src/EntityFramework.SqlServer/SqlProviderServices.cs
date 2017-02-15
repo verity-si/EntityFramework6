@@ -100,6 +100,7 @@ namespace System.Data.Entity.SqlServer
         private static readonly SqlProviderServices _providerInstance = new SqlProviderServices();
 
         private static bool _truncateDecimalsToScale = true;
+        private static bool _useOrderByRowNumberForQueriesWithOffset = true;
 
         /// <summary>
         /// The Singleton instance of the SqlProviderServices type.
@@ -129,6 +130,16 @@ namespace System.Data.Entity.SqlServer
         {
             get { return _truncateDecimalsToScale; }
             set { _truncateDecimalsToScale = value; }
+        }
+
+        /// <summary>
+        /// Set this flag to false to prevent ordering using a row_number() function for queries with OFFSET operation, and order by columns directly instead.
+        /// </summary>
+        /// <remarks>Using row_number() can reduce ambiguity of the ordering result for some cases.</remarks>
+        public static bool UseOrderByRowNumberForQueriesWithOffset
+        {
+            get { return _useOrderByRowNumberForQueriesWithOffset; }
+            set { _useOrderByRowNumberForQueriesWithOffset = value; }
         }
 
         /// <summary>
@@ -243,7 +254,7 @@ namespace System.Data.Entity.SqlServer
             CommandType commandType;
             HashSet<string> paramsToForceNonUnicode;
             command.CommandText = SqlGenerator.GenerateSql(
-                commandTree, sqlVersion, out parameters, out commandType, out paramsToForceNonUnicode);
+                commandTree, sqlVersion, _useOrderByRowNumberForQueriesWithOffset, out parameters, out commandType, out paramsToForceNonUnicode);
             command.CommandType = commandType;
 
             // Get the function (if any) implemented by the command tree since this influences our interpretation of parameters
